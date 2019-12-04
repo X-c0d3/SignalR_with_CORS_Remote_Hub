@@ -1,0 +1,82 @@
+﻿@{
+    ViewBag.Title = "SignalR Client Test";
+}
+
+@section scripts {
+    <script src="~/Scripts/jquery.signalR-2.4.1.min.js"></script>
+    <script src="http://localhost:50936/signalr/hubs"></script>
+    <script>
+        $(function () {
+
+            //$.support.cors = true;
+
+            $.connection.hub.qs = { 'UserId': '35' };
+
+            //************* Solution1 Without the generated proxy *******************
+
+            $.connection.hub.url = 'http://localhost:50936/signalr';
+            $.connection.hub.logging = true;
+
+            var contosoChatHubProxy = $.connection.MyHub;
+            contosoChatHubProxy.client.PrintMessage = function (name, message) {
+                console.log(name + ' ' + JSON.stringify(message));
+
+                $('#txtOutput').val(JSON.stringify(message));
+            };
+            $.connection.hub.start({ transport: ['webSockets', 'longPolling'] }).done(function () {
+                console.log('Connected');
+                console.log("Connected, transport = " + $.connection.hub.transport.name);
+                contosoChatHubProxy.server.send('jib', 'X-c0d3');
+            }).fail(function (reason) {
+                console.log("SignalR connection failed: " + reason);
+            });
+
+            $.connection.hub.error(function (error) {
+                console.log(error);
+            });
+
+            $.connection.hub.connectionSlow(function () {
+                console.log('We are currently experiencing difficulties with the connection.')
+            });
+
+
+
+            // *************** Solution2 Without the generated proxy *********************
+
+            //var connection = $.hubConnection();
+            //connection.logging = true;
+            //var contosoChatHubProxy = connection.createHubProxy('MyHub');
+            //connection.url = 'http://localhost:50936/signalr';
+
+            //contosoChatHubProxy.on('PrintMessage', function (name, message) {
+            //    console.log(name + ' ' + JSON.stringify(message));
+            //});
+
+            //connection.start({ transport: ['webSockets', 'longPolling'] }).done(function () {
+            //    console.log('Connected');
+            //    contosoChatHubProxy.invoke('send', 'jib', 'hello');
+            //}).fail(function (reason) {
+            //    console.log("SignalR connection failed: " + reason);
+            //});
+
+            //connection.error(function (error) {
+            //    console.log(error);
+            //});
+        });
+    </script>
+}
+
+<div class="row">
+    <br />
+
+    <h2>SignalR Client Test</h2>
+    <br />
+    Please you on console logs (Developer Tools)
+    <p>
+        - If you want to add ip for allow CORS  please look on StartUp.cs  (SignalR Server Project)
+    </p>
+    <br />
+    Response from SignalR Hubs
+    <br />
+    <textarea id="txtOutput" rows="8" cols="100"></textarea>
+</div>
